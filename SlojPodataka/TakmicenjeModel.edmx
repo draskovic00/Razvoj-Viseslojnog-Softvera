@@ -1,0 +1,334 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="TakmicenjeDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Korisnik">
+          <Key>
+            <PropertyRef Name="KorisnikID" />
+          </Key>
+          <Property Name="KorisnikID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="KorisnickoIme" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Lozinka" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="ImePrezimeTrenera" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="NazivKluba" Type="nvarchar" MaxLength="100" Nullable="false" />
+        </EntityType>
+        <EntityType Name="PrijavaTakmicara">
+          <Key>
+            <PropertyRef Name="PrijavaID" />
+          </Key>
+          <Property Name="PrijavaID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="NazivPrvenstva" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Disciplinam" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="DatumPrijave" Type="datetime" Nullable="false" />
+          <Property Name="Mesto" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="KorisnikID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="StarosnaKategorija">
+          <Key>
+            <PropertyRef Name="KategorijaID" />
+          </Key>
+          <Property Name="KategorijaID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="NazivKategorije" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="StavkaPrijave">
+          <Key>
+            <PropertyRef Name="StavkaID" />
+          </Key>
+          <Property Name="StavkaID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="PrijavaID" Type="int" Nullable="false" />
+          <Property Name="ImePrezime" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="DatumRodjenja" Type="date" Nullable="false" />
+          <Property Name="KategorijaID" Type="int" Nullable="false" />
+          <Property Name="TezinskaKategorija" Type="nvarchar" MaxLength="20" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_Prijava_Korisnik">
+          <End Role="Korisnik" Type="Self.Korisnik" Multiplicity="1" />
+          <End Role="PrijavaTakmicara" Type="Self.PrijavaTakmicara" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Korisnik">
+              <PropertyRef Name="KorisnikID" />
+            </Principal>
+            <Dependent Role="PrijavaTakmicara">
+              <PropertyRef Name="KorisnikID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_StavkaPrijave_Kategorija">
+          <End Role="StarosnaKategorija" Type="Self.StarosnaKategorija" Multiplicity="1" />
+          <End Role="StavkaPrijave" Type="Self.StavkaPrijave" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="StarosnaKategorija">
+              <PropertyRef Name="KategorijaID" />
+            </Principal>
+            <Dependent Role="StavkaPrijave">
+              <PropertyRef Name="KategorijaID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_StavkaPrijave_Prijava">
+          <End Role="PrijavaTakmicara" Type="Self.PrijavaTakmicara" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="StavkaPrijave" Type="Self.StavkaPrijave" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PrijavaTakmicara">
+              <PropertyRef Name="PrijavaID" />
+            </Principal>
+            <Dependent Role="StavkaPrijave">
+              <PropertyRef Name="PrijavaID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Function Name="sp_ProveriKorisnika" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="KorisnickoIme" Type="nvarchar" Mode="In" />
+          <Parameter Name="Lozinka" Type="nvarchar" Mode="In" />
+        </Function>
+        <Function Name="sp_UnesiPrijavu" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="NazivPrvenstva" Type="nvarchar" Mode="In" />
+          <Parameter Name="Disciplinam" Type="nvarchar" Mode="In" />
+          <Parameter Name="Mesto" Type="nvarchar" Mode="In" />
+          <Parameter Name="KorisnikID" Type="int" Mode="In" />
+          <Parameter Name="PrijavaID" Type="int" Mode="InOut" />
+        </Function>
+        <Function Name="sp_UnesiStavkuPrijave" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="PrijavaID" Type="int" Mode="In" />
+          <Parameter Name="ImePrezime" Type="nvarchar" Mode="In" />
+          <Parameter Name="DatumRodjenja" Type="datetime" Mode="In" />
+          <Parameter Name="KategorijaID" Type="int" Mode="In" />
+          <Parameter Name="TezinskaKategorija" Type="nvarchar" Mode="In" />
+        </Function>
+        <EntityContainer Name="TakmicenjeDBModelStoreContainer">
+          <EntitySet Name="Korisnik" EntityType="Self.Korisnik" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="PrijavaTakmicara" EntityType="Self.PrijavaTakmicara" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="StarosnaKategorija" EntityType="Self.StarosnaKategorija" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="StavkaPrijave" EntityType="Self.StavkaPrijave" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_Prijava_Korisnik" Association="Self.FK_Prijava_Korisnik">
+            <End Role="Korisnik" EntitySet="Korisnik" />
+            <End Role="PrijavaTakmicara" EntitySet="PrijavaTakmicara" />
+          </AssociationSet>
+          <AssociationSet Name="FK_StavkaPrijave_Kategorija" Association="Self.FK_StavkaPrijave_Kategorija">
+            <End Role="StarosnaKategorija" EntitySet="StarosnaKategorija" />
+            <End Role="StavkaPrijave" EntitySet="StavkaPrijave" />
+          </AssociationSet>
+          <AssociationSet Name="FK_StavkaPrijave_Prijava" Association="Self.FK_StavkaPrijave_Prijava">
+            <End Role="PrijavaTakmicara" EntitySet="PrijavaTakmicara" />
+            <End Role="StavkaPrijave" EntitySet="StavkaPrijave" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="TakmicenjeDBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Korisnik">
+          <Key>
+            <PropertyRef Name="KorisnikID" />
+          </Key>
+          <Property Name="KorisnikID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="KorisnickoIme" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Lozinka" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ImePrezimeTrenera" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="NazivKluba" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="PrijavaTakmicara" Relationship="Self.FK_Prijava_Korisnik" FromRole="Korisnik" ToRole="PrijavaTakmicara" />
+        </EntityType>
+        <EntityType Name="PrijavaTakmicara">
+          <Key>
+            <PropertyRef Name="PrijavaID" />
+          </Key>
+          <Property Name="PrijavaID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="NazivPrvenstva" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Disciplinam" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="DatumPrijave" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Mesto" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="KorisnikID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Korisnik" Relationship="Self.FK_Prijava_Korisnik" FromRole="PrijavaTakmicara" ToRole="Korisnik" />
+          <NavigationProperty Name="StavkaPrijave" Relationship="Self.FK_StavkaPrijave_Prijava" FromRole="PrijavaTakmicara" ToRole="StavkaPrijave" />
+        </EntityType>
+        <EntityType Name="StarosnaKategorija">
+          <Key>
+            <PropertyRef Name="KategorijaID" />
+          </Key>
+          <Property Name="KategorijaID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="NazivKategorije" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="StavkaPrijave" Relationship="Self.FK_StavkaPrijave_Kategorija" FromRole="StarosnaKategorija" ToRole="StavkaPrijave" />
+        </EntityType>
+        <EntityType Name="StavkaPrijave">
+          <Key>
+            <PropertyRef Name="StavkaID" />
+          </Key>
+          <Property Name="StavkaID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PrijavaID" Type="Int32" Nullable="false" />
+          <Property Name="ImePrezime" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="DatumRodjenja" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="KategorijaID" Type="Int32" Nullable="false" />
+          <Property Name="TezinskaKategorija" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="PrijavaTakmicara" Relationship="Self.FK_StavkaPrijave_Prijava" FromRole="StavkaPrijave" ToRole="PrijavaTakmicara" />
+          <NavigationProperty Name="StarosnaKategorija" Relationship="Self.FK_StavkaPrijave_Kategorija" FromRole="StavkaPrijave" ToRole="StarosnaKategorija" />
+        </EntityType>
+        <Association Name="FK_Prijava_Korisnik">
+          <End Role="Korisnik" Type="Self.Korisnik" Multiplicity="1" />
+          <End Role="PrijavaTakmicara" Type="Self.PrijavaTakmicara" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Korisnik">
+              <PropertyRef Name="KorisnikID" />
+            </Principal>
+            <Dependent Role="PrijavaTakmicara">
+              <PropertyRef Name="KorisnikID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_StavkaPrijave_Prijava">
+          <End Role="PrijavaTakmicara" Type="Self.PrijavaTakmicara" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="StavkaPrijave" Type="Self.StavkaPrijave" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PrijavaTakmicara">
+              <PropertyRef Name="PrijavaID" />
+            </Principal>
+            <Dependent Role="StavkaPrijave">
+              <PropertyRef Name="PrijavaID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_StavkaPrijave_Kategorija">
+          <End Role="StarosnaKategorija" Type="Self.StarosnaKategorija" Multiplicity="1" />
+          <End Role="StavkaPrijave" Type="Self.StavkaPrijave" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="StarosnaKategorija">
+              <PropertyRef Name="KategorijaID" />
+            </Principal>
+            <Dependent Role="StavkaPrijave">
+              <PropertyRef Name="KategorijaID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="TakmicenjeDBEntities2" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Korisnik" EntityType="Self.Korisnik" />
+          <EntitySet Name="PrijavaTakmicara" EntityType="Self.PrijavaTakmicara" />
+          <EntitySet Name="StarosnaKategorija" EntityType="Self.StarosnaKategorija" />
+          <EntitySet Name="StavkaPrijave" EntityType="Self.StavkaPrijave" />
+          <AssociationSet Name="FK_Prijava_Korisnik" Association="Self.FK_Prijava_Korisnik">
+            <End Role="Korisnik" EntitySet="Korisnik" />
+            <End Role="PrijavaTakmicara" EntitySet="PrijavaTakmicara" />
+          </AssociationSet>
+          <AssociationSet Name="FK_StavkaPrijave_Prijava" Association="Self.FK_StavkaPrijave_Prijava">
+            <End Role="PrijavaTakmicara" EntitySet="PrijavaTakmicara" />
+            <End Role="StavkaPrijave" EntitySet="StavkaPrijave" />
+          </AssociationSet>
+          <AssociationSet Name="FK_StavkaPrijave_Kategorija" Association="Self.FK_StavkaPrijave_Kategorija">
+            <End Role="StarosnaKategorija" EntitySet="StarosnaKategorija" />
+            <End Role="StavkaPrijave" EntitySet="StavkaPrijave" />
+          </AssociationSet>
+          <FunctionImport Name="sp_ProveriKorisnika" ReturnType="Collection(TakmicenjeDBModel.sp_ProveriKorisnika_Result)">
+            <Parameter Name="KorisnickoIme" Mode="In" Type="String" />
+            <Parameter Name="Lozinka" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="sp_UnesiPrijavu">
+            <Parameter Name="NazivPrvenstva" Mode="In" Type="String" />
+            <Parameter Name="Disciplinam" Mode="In" Type="String" />
+            <Parameter Name="Mesto" Mode="In" Type="String" />
+            <Parameter Name="KorisnikID" Mode="In" Type="Int32" />
+            <Parameter Name="PrijavaID" Mode="InOut" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="sp_UnesiStavkuPrijave">
+            <Parameter Name="PrijavaID" Mode="In" Type="Int32" />
+            <Parameter Name="ImePrezime" Mode="In" Type="String" />
+            <Parameter Name="DatumRodjenja" Mode="In" Type="DateTime" />
+            <Parameter Name="KategorijaID" Mode="In" Type="Int32" />
+            <Parameter Name="TezinskaKategorija" Mode="In" Type="String" />
+          </FunctionImport>
+        </EntityContainer>
+        <ComplexType Name="sp_ProveriKorisnika_Result">
+          <Property Type="Int32" Name="KorisnikID" Nullable="false" />
+          <Property Type="String" Name="KorisnickoIme" Nullable="false" MaxLength="50" />
+          <Property Type="String" Name="ImePrezimeTrenera" Nullable="false" MaxLength="100" />
+          <Property Type="String" Name="NazivKluba" Nullable="false" MaxLength="100" />
+        </ComplexType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="TakmicenjeDBModelStoreContainer" CdmEntityContainer="TakmicenjeDBEntities2">
+          <EntitySetMapping Name="Korisnik">
+            <EntityTypeMapping TypeName="TakmicenjeDBModel.Korisnik">
+              <MappingFragment StoreEntitySet="Korisnik">
+                <ScalarProperty Name="KorisnikID" ColumnName="KorisnikID" />
+                <ScalarProperty Name="KorisnickoIme" ColumnName="KorisnickoIme" />
+                <ScalarProperty Name="Lozinka" ColumnName="Lozinka" />
+                <ScalarProperty Name="ImePrezimeTrenera" ColumnName="ImePrezimeTrenera" />
+                <ScalarProperty Name="NazivKluba" ColumnName="NazivKluba" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PrijavaTakmicara">
+            <EntityTypeMapping TypeName="TakmicenjeDBModel.PrijavaTakmicara">
+              <MappingFragment StoreEntitySet="PrijavaTakmicara">
+                <ScalarProperty Name="PrijavaID" ColumnName="PrijavaID" />
+                <ScalarProperty Name="NazivPrvenstva" ColumnName="NazivPrvenstva" />
+                <ScalarProperty Name="Disciplinam" ColumnName="Disciplinam" />
+                <ScalarProperty Name="DatumPrijave" ColumnName="DatumPrijave" />
+                <ScalarProperty Name="Mesto" ColumnName="Mesto" />
+                <ScalarProperty Name="KorisnikID" ColumnName="KorisnikID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="StarosnaKategorija">
+            <EntityTypeMapping TypeName="TakmicenjeDBModel.StarosnaKategorija">
+              <MappingFragment StoreEntitySet="StarosnaKategorija">
+                <ScalarProperty Name="KategorijaID" ColumnName="KategorijaID" />
+                <ScalarProperty Name="NazivKategorije" ColumnName="NazivKategorije" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="StavkaPrijave">
+            <EntityTypeMapping TypeName="TakmicenjeDBModel.StavkaPrijave">
+              <MappingFragment StoreEntitySet="StavkaPrijave">
+                <ScalarProperty Name="StavkaID" ColumnName="StavkaID" />
+                <ScalarProperty Name="PrijavaID" ColumnName="PrijavaID" />
+                <ScalarProperty Name="ImePrezime" ColumnName="ImePrezime" />
+                <ScalarProperty Name="DatumRodjenja" ColumnName="DatumRodjenja" />
+                <ScalarProperty Name="KategorijaID" ColumnName="KategorijaID" />
+                <ScalarProperty Name="TezinskaKategorija" ColumnName="TezinskaKategorija" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="sp_ProveriKorisnika" FunctionName="TakmicenjeDBModel.Store.sp_ProveriKorisnika">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="TakmicenjeDBModel.sp_ProveriKorisnika_Result">
+                <ScalarProperty Name="KorisnikID" ColumnName="KorisnikID" />
+                <ScalarProperty Name="KorisnickoIme" ColumnName="KorisnickoIme" />
+                <ScalarProperty Name="ImePrezimeTrenera" ColumnName="ImePrezimeTrenera" />
+                <ScalarProperty Name="NazivKluba" ColumnName="NazivKluba" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="sp_UnesiPrijavu" FunctionName="TakmicenjeDBModel.Store.sp_UnesiPrijavu" />
+          <FunctionImportMapping FunctionImportName="sp_UnesiStavkuPrijave" FunctionName="TakmicenjeDBModel.Store.sp_UnesiStavkuPrijave" />
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

@@ -1,0 +1,174 @@
+﻿/* Generala i reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f4f7f6;
+    color: #333;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Zaglavlja */
+h1, h2, h3 {
+    color: #1a252f;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+h2 {
+    border-bottom: 2px solid #e67e22;
+    padding-bottom: 8px;
+    margin-top: 25px;
+}
+
+/* Sekcije i forme */
+.form-section {
+    background-color: #fcfcfc;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+        color: #2c3e50;
+    }
+
+.form-control {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+
+    .form-control:focus {
+        border-color: #e67e22;
+        outline: none;
+    }
+
+/* Dugmad */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    font-size: 0.95rem;
+}
+
+    .btn:active {
+        transform: scale(0.98);
+    }
+
+.btn-primary {
+    background-color: #e67e22;
+    color: white;
+}
+
+    .btn-primary:hover {
+        background-color: #d35400;
+    }
+
+.btn-success {
+    background-color: #27ae60;
+    color: white;
+    width: 100%;
+    padding: 14px;
+    font-size: 1.1rem;
+    margin-top: 15px;
+}
+
+    .btn-success:hover {
+        background-color: #219150;
+    }
+
+/* Tabela (GridView) */
+.grid-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    background: white;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+    .grid-table th {
+        background-color: #2c3e50;
+        color: white;
+        padding: 12px;
+        text-align: left;
+        font-size: 0.9rem;
+    }
+
+    .grid-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #eee;
+        font-size: 0.9rem;
+    }
+
+    .grid-table tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    .grid-table tr:hover {
+        background-color: #f1f1f1;
+    }
+
+/* Poruke o statusu */
+.status-label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+/* Podesavanje za štampu */
+@media print {
+    body {
+        background-color: white;
+        padding: 0;
+    }
+
+    .container {
+        box-shadow: none;
+        padding: 0;
+        width: 100%;
+    }
+
+    .btn, .no-print {
+        display: none !important;
+    }
+}

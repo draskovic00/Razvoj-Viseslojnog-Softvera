@@ -1,0 +1,19 @@
+{
+  "StarosneKategorije": [
+    {
+      "Kategorija": "Kadet",
+      "MinGodina": 12,
+      "MaxGodina": 15
+    },
+    {
+      "Kategorija": "Junior",
+      "MinGodina": 16,
+      "MaxGodina": 18
+    },
+    {
+      "Kategorija": "Senior",
+      "MinGodina": 19,
+      "MaxGodina": 40
+    }
+  ]
+}
