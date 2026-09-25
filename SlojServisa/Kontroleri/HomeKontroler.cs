@@ -6,7 +6,7 @@ using System.Web.Mvc;
 
 namespace SlojServisa.Controllers
 {
-    public class HomeController : Controller
+    public class HomeKontroler : Controller
     {
         public ActionResult Index()
         {

@@ -1,9 +1,11 @@
 ﻿using PoslovnaLogika;
 using SlojPodataka;
+using SlojServisa; // Dodato za CRUDoperacije
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Web.UI.WebControls;
 
 namespace PrijavaTakmicaraNaTakmicenjeIzIza
 {
@@ -11,6 +13,7 @@ namespace PrijavaTakmicaraNaTakmicenjeIzIza
     {
         private readonly KategorijaRepository _katRepo = new KategorijaRepository();
         private readonly ObradaPrijave _obrada = new ObradaPrijave();
+        private readonly CRUDoperacije _crudService = new CRUDoperacije(); // Instanca servisa za CRUD operacije
 
         // Privremena lista za Detail stavke pre upisa u bazu
         private static List<StavkaPrijave> _privremeneStavke = new List<StavkaPrijave>();
@@ -45,6 +48,24 @@ namespace PrijavaTakmicaraNaTakmicenjeIzIza
             ddlKategorija.DataBind();
         }
 
+        private void OsveziGrid()
+        {
+            var kategorije = _katRepo.DohvatiSve();
+            string izabranaDisciplina = ddlDisciplina.SelectedValue;
+
+            gvStavke.DataSource = _privremeneStavke.Select(s => new
+            {
+                ImePrezime = s.ImePrezime,
+                DatumRodjenja = s.DatumRodjenja.ToString("yyyy-MM-dd"),
+                KategorijaID = s.KategorijaID,
+                StarosnaKategorija = kategorije.FirstOrDefault(k => k.KategorijaID == s.KategorijaID)?.NazivKategorije ?? "",
+                Disciplina = izabranaDisciplina,
+                TezinskaKategorija = s.TezinskaKategorija
+            }).ToList();
+
+            gvStavke.DataBind();
+        }
+
         protected void btnDodajStavku_Click( object sender, EventArgs e )
         {
             if ( string.IsNullOrWhiteSpace(txtDatumRodjenja.Text) )
@@ -69,7 +90,6 @@ namespace PrijavaTakmicaraNaTakmicenjeIzIza
 
             string selektovanaKatNaziv = ddlKategorija.SelectedItem.Text;
             int selektovanaKatID = int.Parse(ddlKategorija.SelectedValue);
-            string izabranaDisciplina = ddlDisciplina.SelectedValue; // Uzimamo disciplinu sa forme prvenstva
             string urlServisa = ConfigurationManager.AppSettings["RestServisUrl"] ?? "https://localhost:44398";
 
             // Validacija poslovnog pravila sa REST servisa
@@ -93,21 +113,101 @@ namespace PrijavaTakmicaraNaTakmicenjeIzIza
                 TezinskaKategorija = txtTezina.Text
             });
 
-            // Prikaz u GridView u traženom redosledu:
-            // Ime i prezime | Datum rođenja | Starosna kategorija | Disciplina | Težinska kategorija
-            gvStavke.DataSource = _privremeneStavke.Select(s => new {
-                ImeIPrezime = s.ImePrezime,
-                DatumRodjenja = s.DatumRodjenja.ToString("dd.MM.yyyy."),
-                StarosnaKategorija = selektovanaKatNaziv,
-                Disciplina = izabranaDisciplina,
-                TezinskaKategorija = s.TezinskaKategorija
-            }).ToList();
+            OsveziGrid();
 
-            gvStavke.DataBind();
+            // Reset unosa za novog takmičara
+            txtImePrezime.Text = "";
+            txtDatumRodjenja.Text = "";
+            txtTezina.Text = "";
 
             lblStatus.ForeColor = System.Drawing.Color.Green;
             lblStatus.Text = "Takmičar uspešno dodat u listu!";
         }
+
+        #region GridView CRUD Operacije nad stavkama
+
+        protected void gvStavke_RowEditing( object sender, GridViewEditEventArgs e )
+        {
+            gvStavke.EditIndex = e.NewEditIndex;
+            OsveziGrid();
+        }
+
+        protected void gvStavke_RowCancelingEdit( object sender, GridViewCancelEditEventArgs e )
+        {
+            gvStavke.EditIndex = -1;
+            OsveziGrid();
+        }
+
+        protected void gvStavke_RowUpdating( object sender, GridViewUpdateEventArgs e )
+        {
+            int index = e.RowIndex;
+            GridViewRow row = gvStavke.Rows[index];
+
+            TextBox txtEditIme = ( TextBox ) row.FindControl("txtEditImePrezime");
+            TextBox txtEditDatum = ( TextBox ) row.FindControl("txtEditDatumRodjenja");
+            DropDownList ddlEditKat = ( DropDownList ) row.FindControl("ddlEditKategorija");
+            TextBox txtEditTezina = ( TextBox ) row.FindControl("txtEditTezina");
+
+            if ( txtEditIme != null && txtEditDatum != null && ddlEditKat != null && txtEditTezina != null )
+            {
+                if ( DateTime.TryParse(txtEditDatum.Text, out DateTime noviDatum) )
+                {
+                    _privremeneStavke[index].ImePrezime = txtEditIme.Text;
+                    _privremeneStavke[index].DatumRodjenja = noviDatum;
+                    _privremeneStavke[index].KategorijaID = int.Parse(ddlEditKat.SelectedValue);
+                    _privremeneStavke[index].TezinskaKategorija = txtEditTezina.Text;
+
+                    lblStatus.ForeColor = System.Drawing.Color.Green;
+                    lblStatus.Text = "Stavka uspešno izmenjena!";
+                }
+                else
+                {
+                    lblStatus.ForeColor = System.Drawing.Color.Red;
+                    lblStatus.Text = "Neispravan format datuma!";
+                    return;
+                }
+            }
+
+            gvStavke.EditIndex = -1;
+            OsveziGrid();
+        }
+
+        protected void gvStavke_RowDeleting( object sender, GridViewDeleteEventArgs e )
+        {
+            int index = e.RowIndex;
+            if ( index >= 0 && index < _privremeneStavke.Count )
+            {
+                _privremeneStavke.RemoveAt(index);
+                OsveziGrid();
+
+                lblStatus.ForeColor = System.Drawing.Color.Green;
+                lblStatus.Text = "Takmičar uklonjen iz liste!";
+            }
+        }
+
+        protected void gvStavke_RowDataBound( object sender, GridViewRowEventArgs e )
+        {
+            if ( e.Row.RowType == DataControlRowType.DataRow && (e.Row.RowState & DataControlRowState.Edit) > 0 )
+            {
+                DropDownList ddlEditKat = ( DropDownList ) e.Row.FindControl("ddlEditKategorija");
+                HiddenField hfKatID = ( HiddenField ) e.Row.FindControl("hfSelectedKatID");
+
+                if ( ddlEditKat != null )
+                {
+                    ddlEditKat.DataSource = _katRepo.DohvatiSve();
+                    ddlEditKat.DataTextField = "NazivKategorije";
+                    ddlEditKat.DataValueField = "KategorijaID";
+                    ddlEditKat.DataBind();
+
+                    if ( hfKatID != null && !string.IsNullOrEmpty(hfKatID.Value) )
+                    {
+                        ddlEditKat.SelectedValue = hfKatID.Value;
+                    }
+                }
+            }
+        }
+
+        #endregion
 
         protected void btnSacuvajSve_Click( object sender, EventArgs e )
         {
@@ -128,9 +228,12 @@ namespace PrijavaTakmicaraNaTakmicenjeIzIza
                 StavkaPrijave = _privremeneStavke
             };
 
-            bool uspesno = _obrada.SacuvajKompletnuPrijavu(novaPrijava);
+            // Korišćenje CRUDoperacije servisa za čuvanje
+            bool uspesno = _crudService.DodajPrijavu(novaPrijava);
+
             if ( uspesno )
             {
+                _privremeneStavke.Clear(); // Pražnjenje privremene liste
                 Response.Redirect("StampaPrijave.aspx?id=" + novaPrijava.PrijavaID);
             }
             else

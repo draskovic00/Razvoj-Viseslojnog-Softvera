@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="PoslovnaLogika/PoslovnaLogika.csproj" Id="a1080f85-da2a-4e4b-9c50-7a4c385ab2e1" />
+  <Project Path="PrijavaTakmicara.MVC/PrijavaTakmicara.MVC.csproj" Id="f9247a5f-29cc-4b01-859c-c6fbf4fa0392" />
   <Project Path="PrijavaTakmicaraNaTakmicenjeIzKikBoksa/PrijavaTakmicaraNaTakmicenjeIzKikBoksa.csproj" Id="5ea37720-6cb8-44e6-a63d-f05edb786564" />
   <Project Path="SlojPodataka/SlojPodataka.csproj" Id="23d57341-8592-43b7-9a18-311cfd8c1caf" />
   <Project Path="SlojServisa/SlojServisa.csproj" Id="1f542a0b-499e-4898-ba6a-7d85069c5dde" />

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace SlojPodataka
 {
@@ -187,20 +188,64 @@ namespace SlojPodataka
             }
         }
 
-        public bool Izmeni( PrijavaTakmicara entitet )
+        public bool Izmeni( PrijavaTakmicara prijava )
         {
             using ( SqlConnection conn = new SqlConnection(ConnectionString) )
             {
-                string query = "UPDATE PrijavaTakmicara SET NazivPrvenstva=@NazivPrvenstva, Disciplinam=@Disciplinam, Mesto=@Mesto WHERE PrijavaID=@PrijavaID";
-                using ( SqlCommand cmd = KreirajKomandu(query, CommandType.Text, conn) )
-                {
-                    cmd.Parameters.AddWithValue("@NazivPrvenstva", entitet.NazivPrvenstva);
-                    cmd.Parameters.AddWithValue("@Disciplinam", entitet.Disciplinam);
-                    cmd.Parameters.AddWithValue("@Mesto", entitet.Mesto);
-                    cmd.Parameters.AddWithValue("@PrijavaID", entitet.PrijavaID);
+                conn.Open();
+                SqlTransaction transaction = conn.BeginTransaction(); // Transakcija čuva sve ili ništa
 
-                    conn.Open();
-                    return cmd.ExecuteNonQuery() > 0;
+                try
+                {
+                    // 1. Ažuriranje glavnih podataka o prijavi
+                    string updateMaster = @"UPDATE PrijavaTakmicara 
+                                    SET NazivPrvenstva = @Naziv, Disciplinam = @Disciplina, Mesto = @Mesto 
+                                    WHERE PrijavaID = @PrijavaID";
+
+                    using ( SqlCommand cmd = KreirajKomandu(updateMaster, CommandType.Text, conn) )
+                    {
+                        cmd.Transaction = transaction;
+                        cmd.Parameters.AddWithValue("@Naziv", prijava.NazivPrvenstva);
+                        cmd.Parameters.AddWithValue("@Disciplina", prijava.Disciplinam);
+                        cmd.Parameters.AddWithValue("@Mesto", prijava.Mesto);
+                        cmd.Parameters.AddWithValue("@PrijavaID", prijava.PrijavaID);
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    // 2. Brisanje starih stavki za tu prijavu iz baze
+                    string deleteDetails = "DELETE FROM StavkaPrijave WHERE PrijavaID = @PrijavaID";
+                    using ( SqlCommand cmdDelete = KreirajKomandu(deleteDetails, CommandType.Text, conn) )
+                    {
+                        cmdDelete.Transaction = transaction;
+                        cmdDelete.Parameters.AddWithValue("@PrijavaID", prijava.PrijavaID);
+                        cmdDelete.ExecuteNonQuery();
+                    }
+
+                    // 3. Upis novih/izmenjenih stavki iz liste
+                    string insertDetail = @"INSERT INTO StavkaPrijave (PrijavaID, ImePrezime, DatumRodjenja, KategorijaID, TezinskaKategorija) 
+                                    VALUES (@PrijavaID, @ImePrezime, @DatumRodjenja, @KategorijaID, @TezinskaKategorija)";
+
+                    foreach ( var stavka in prijava.StavkaPrijave )
+                    {
+                        using ( SqlCommand cmdInsert = KreirajKomandu(insertDetail, CommandType.Text, conn) )
+                        {
+                            cmdInsert.Transaction = transaction;
+                            cmdInsert.Parameters.AddWithValue("@PrijavaID", prijava.PrijavaID);
+                            cmdInsert.Parameters.AddWithValue("@ImePrezime", stavka.ImePrezime);
+                            cmdInsert.Parameters.AddWithValue("@DatumRodjenja", stavka.DatumRodjenja);
+                            cmdInsert.Parameters.AddWithValue("@KategorijaID", stavka.KategorijaID);
+                            cmdInsert.Parameters.AddWithValue("@TezinskaKategorija", ( object ) stavka.TezinskaKategorija ?? DBNull.Value);
+                            cmdInsert.ExecuteNonQuery();
+                        }
+                    }
+
+                    transaction.Commit(); // Potvrda svih izmjena u bazi
+                    return true;
+                }
+                catch ( Exception )
+                {
+                    transaction.Rollback(); // Poništavanje ako dođe do greške
+                    return false;
                 }
             }
         }

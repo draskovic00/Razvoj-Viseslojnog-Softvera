@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Web.Http;
 namespace SlojServisa.Controllers
 {
-    public class PrijavaController : ApiController
+    public class PrijavaKontroler : ApiController
     {
         private readonly PrijavaRepository _prijavaRepo = new PrijavaRepository();
         private readonly KorisnikRepository _korisnikRepo = new KorisnikRepository();

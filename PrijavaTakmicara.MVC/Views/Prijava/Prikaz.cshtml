@@ -1,0 +1,43 @@
+@model IEnumerable<SlojPodataka.PrijavaTakmicara>
+
+@{
+    ViewBag.Title = "Pregled Prijava";
+}
+
+<h2>Pregled svih prijava</h2>
+
+<p>
+    @Html.ActionLink("Dodaj novu prijavu", "Kreiraj", null, new { @class = "btn btn-primary" })
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Naziv Prvenstva</th>
+            <th>Disciplina</th>
+            <th>Mesto</th>
+            <th>Akcije</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ( var item in Model )
+        {
+            <tr>
+                <td>@item.PrijavaID</td>
+                <td>@item.NazivPrvenstva</td>
+                <td>@item.Disciplinam</td>
+                <td>@item.Mesto</td>
+                <td>
+
+                    @Html.ActionLink("Detalji", "Detalji", new { id = item.PrijavaID }, new { @class = "btn btn-info btn-sm" })
+                    @Html.ActionLink("Izmeni", "Izmeni", new { id = item.PrijavaID }, new { @class = "btn btn-warning btn-sm" })
+                    @using ( Html.BeginForm("Obrisi", "Prijava", new { id = item.PrijavaID }, FormMethod.Post, new { style = "display:inline;" }) )
+                    {
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Da li ste sigurni da želite obrisati ovu prijavu?');">Obriši</button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

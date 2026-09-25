@@ -1,4 +1,5 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="UnosPrijave.aspx.cs" Inherits="PrijavaTakmicaraNaTakmicenjeIzIza.UnosPrijave" %>
+
 <!DOCTYPE html>
 <html>
 <head runat="server">
@@ -9,11 +10,11 @@
 
     <title>Prijava takmičara</title>
     <script type="text/javascript">
-        /* global flatpickr */
+/* global flatpickr */
 
-        function validirajFormu() {
-            /** @type {HTMLInputElement} */
-            var elNaziv = /** @type {HTMLInputElement} */ (document.getElementById('<%= txtNazivPrvenstva.ClientID %>'));
+function validirajFormu() {
+    /** @type {HTMLInputElement} */
+    var elNaziv = /** @type {HTMLInputElement} */ (document.getElementById('<%= txtNazivPrvenstva.ClientID %>'));
             
             /** @type {HTMLInputElement} */
             var elMesto = /** @type {HTMLInputElement} */ (document.getElementById('<%= txtMesto.ClientID %>'));
@@ -128,8 +129,64 @@
                 <asp:Button ID="btnDodajStavku" runat="server" Text="Dodaj takmičara u listu" CssClass="btn btn-primary" OnClick="btnDodajStavku_Click" />
             </div>
 
-            <!-- Tabela i završno čuvanje -->
-            <asp:GridView ID="gvStavke" runat="server" AutoGenerateColumns="True" CssClass="grid-table"></asp:GridView>
+            <!-- Tabela sa CRUD funkcionalnostima -->
+            <asp:GridView ID="gvStavke" runat="server" AutoGenerateColumns="False" CssClass="grid-table"
+                OnRowEditing="gvStavke_RowEditing" 
+                OnRowCancelingEdit="gvStavke_RowCancelingEdit" 
+                OnRowUpdating="gvStavke_RowUpdating" 
+                OnRowDeleting="gvStavke_RowDeleting"
+                OnRowDataBound="gvStavke_RowDataBound">
+                <Columns>
+                    <asp:TemplateField HeaderText="Ime i prezime">
+                        <ItemTemplate>
+                            <%# Eval("ImePrezime") %>
+                        </ItemTemplate>
+                        <EditItemTemplate>
+                            <asp:TextBox ID="txtEditImePrezime" runat="server" Text='<%# Bind("ImePrezime") %>' CssClass="form-control"></asp:TextBox>
+                        </EditItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Datum rođenja">
+                        <ItemTemplate>
+                            <%# Eval("DatumRodjenja") %>
+                        </ItemTemplate>
+                        <EditItemTemplate>
+                            <asp:TextBox ID="txtEditDatumRodjenja" runat="server" Text='<%# Bind("DatumRodjenja") %>' CssClass="form-control datepicker"></asp:TextBox>
+                        </EditItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Starosna kategorija">
+                        <ItemTemplate>
+                            <%# Eval("StarosnaKategorija") %>
+                        </ItemTemplate>
+                        <EditItemTemplate>
+                            <asp:DropDownList ID="ddlEditKategorija" runat="server" CssClass="form-control"></asp:DropDownList>
+                            <asp:HiddenField ID="hfSelectedKatID" runat="server" Value='<%# Eval("KategorijaID") %>' />
+                        </EditItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Disciplina">
+                        <ItemTemplate>
+                            <%# Eval("Disciplina") %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="Težinska kategorija">
+                        <ItemTemplate>
+                            <%# Eval("TezinskaKategorija") %>
+                        </ItemTemplate>
+                        <EditItemTemplate>
+                            <asp:TextBox ID="txtEditTezina" runat="server" Text='<%# Bind("TezinskaKategorija") %>' CssClass="form-control"></asp:TextBox>
+                        </EditItemTemplate>
+                    </asp:TemplateField>
+
+                    <asp:CommandField ShowEditButton="True" ShowDeleteButton="True" 
+                                      EditText="Izmeni" UpdateText="Sačuvaj" CancelText="Otkaz" DeleteText="Obriši" 
+                                      ControlStyle-CssClass="btn btn-sm" />
+                </Columns>
+            </asp:GridView>
+
+            <br />
             <asp:Button ID="btnSacuvajSve" runat="server" Text="Sačuvaj kompletnu prijavu" CssClass="btn btn-success" OnClick="btnSacuvajSve_Click" />
         </div>
     </form>

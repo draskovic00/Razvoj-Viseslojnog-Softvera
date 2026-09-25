@@ -1,4 +1,5 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="StampaPrijave.aspx.cs" Inherits="PrijavaTakmicaraNaTakmicenjeIzIza.StampaPrijave" %>
+
 <!DOCTYPE html>
 <html>
 <head runat="server">
@@ -57,6 +58,12 @@
             font-weight: bold;
             margin-bottom: 5px;
         }
+        .akcije-traka {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
         @media print {
             .no-print { display: none !important; }
         }
@@ -65,9 +72,11 @@
 <body>
     <form id="form1" runat="server">
         <div class="container">
-            <!-- Gornja komandna traka sa dugmetom za štampu i filterima (sakriva se na štampi) -->
+            <!-- Gornja komandna traka (sakriva se prilikom štampe) -->
             <div class="no-print">
-                <div style="text-align: right; margin-bottom: 15px;">
+                <div class="akcije-traka">
+                    <asp:Button ID="btnObrisiPrijavu" runat="server" Text="Obriši celokupnu prijavu" CssClass="btn btn-danger" 
+                        OnClick="btnObrisiPrijavu_Click" OnClientClick="return confirm('Da li ste sigurni da želite da obrišete kompletnu prijavu iz baze?');" />
                     <button onclick="window.print(); return false;" class="btn btn-primary">Štampaj dokument</button>
                 </div>
 
@@ -130,30 +139,64 @@
 
             <div class="naslov" style="font-size: 18px; text-align: left; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Prijavljeni Takmičari</div>
 
-            <asp:Repeater ID="rptStavke" runat="server">
-                <HeaderTemplate>
-                    <table class="grid-table">
-                        <tr>
-                            <th>Ime i prezime</th>
-                            <th>Datum rođenja</th>
-                            <th>Starosna kategorija</th>
-                            <th>Disciplina</th>
-                            <th>Težinska Kategorija</th>
-                        </tr>
-                </HeaderTemplate>
-                <ItemTemplate>
-                    <tr>
-                        <td><%# Eval("ImePrezime") %></td>
-                        <td><%# Convert.ToDateTime(Eval("DatumRodjenja")).ToString("dd.MM.yyyy.") %></td>
-                        <td><%# Eval("NazivKategorije") %></td>
-                        <td><%# Eval("Disciplina") %></td>
-                        <td><%# Eval("TezinskaKategorija") %></td>
-                    </tr>
-                </ItemTemplate>
-                <FooterTemplate>
-                    </table>
-                </FooterTemplate>
-            </asp:Repeater>
+            <!-- Tabela prijavljenih takmičara sa opcijama za izmenu i brisanje -->
+           <!-- Tabela prijavljenih takmičara sa ispravljenim sintaksnim greškama -->
+<asp:GridView ID="gvStavke" runat="server" AutoGenerateColumns="False" CssClass="grid-table"
+    DataKeyNames="StavkaID"
+    OnRowEditing="gvStavke_RowEditing" 
+    OnRowCancelingEdit="gvStavke_RowCancelingEdit" 
+    OnRowUpdating="gvStavke_RowUpdating" 
+    OnRowDeleting="gvStavke_RowDeleting"
+    OnRowDataBound="gvStavke_RowDataBound">
+    <Columns>
+        <asp:TemplateField HeaderText="Ime i prezime">
+            <ItemTemplate>
+                <%# Eval("ImePrezime") %>
+            </ItemTemplate>
+            <EditItemTemplate>
+                <asp:TextBox ID="txtEditImePrezime" runat="server" Text='<%# Eval("ImePrezime") %>' CssClass="form-control"></asp:TextBox>
+            </EditItemTemplate>
+        </asp:TemplateField>
+
+        <asp:TemplateField HeaderText="Datum rođenja">
+            <ItemTemplate>
+                <%# Convert.ToDateTime(Eval("DatumRodjenja")).ToString("dd.MM.yyyy.") %>
+            </ItemTemplate>
+            <EditItemTemplate>
+                <asp:TextBox ID="txtEditDatumRodjenja" runat="server" Text='<%# Eval("DatumRodjenja") %>' CssClass="form-control datepicker"></asp:TextBox>
+            </EditItemTemplate>
+        </asp:TemplateField>
+
+        <asp:TemplateField HeaderText="Starosna kategorija">
+            <ItemTemplate>
+                <%# Eval("NazivKategorije") %>
+            </ItemTemplate>
+            <EditItemTemplate>
+                <asp:DropDownList ID="ddlEditKategorija" runat="server" CssClass="form-control"></asp:DropDownList>
+                <asp:HiddenField ID="hfSelectedKatID" runat="server" Value='<%# Eval("KategorijaID") %>' />
+            </EditItemTemplate>
+        </asp:TemplateField>
+
+        <asp:TemplateField HeaderText="Disciplina">
+            <ItemTemplate>
+                <%# Eval("Disciplina") %>
+            </ItemTemplate>
+        </asp:TemplateField>
+
+        <asp:TemplateField HeaderText="Težinska Kategorija">
+            <ItemTemplate>
+                <%# Eval("TezinskaKategorija") %>
+            </ItemTemplate>
+            <EditItemTemplate>
+                <asp:TextBox ID="txtEditTezina" runat="server" Text='<%# Eval("TezinskaKategorija") %>' CssClass="form-control"></asp:TextBox>
+            </EditItemTemplate>
+        </asp:TemplateField>
+
+        <asp:CommandField ShowEditButton="True" ShowDeleteButton="True" 
+                          EditText="Izmeni" UpdateText="Sačuvaj" CancelText="Otkaz" DeleteText="Obriši" 
+                          HeaderStyle-CssClass="no-print" ItemStyle-CssClass="no-print" ControlStyle-CssClass="btn btn-sm" />
+    </Columns>
+</asp:GridView>
             
             <asp:Label ID="lblNemaPodataka" runat="server" Text="Nema takmičara koji odgovaraju izabranim filterima." Visible="false" Style="color: red; display: block; margin-top: 10px;"></asp:Label>
         </div>
